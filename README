@@ -1,1 +1,90 @@
-Payment fraud
+flowchart TB
+    %% ---------- Data ----------
+    subgraph DATA["1. Data and Analysis"]
+        direction TB
+        SRC[("IEEE-CIS / PaySim<br/>transactions")] --> RAW[("Raw data<br/>AWS S3")]
+        RAW --> VAL["Data validation<br/>Great Expectations<br/>missing values, range, types"]
+        VAL --> EDA["EDA<br/>class imbalance, temporal drift,<br/>feature correlation, leakage checks"]
+    end
+
+    %% ---------- Feature platform ----------
+    subgraph FEAT["2. Feature Platform (Redis)"]
+        direction TB
+        subgraph OFFP["Offline pipeline (batch)"]
+            FE_B["Batch feature engineering<br/>scheduled by Airflow"] --> OFF[("Offline store<br/>training features")]
+        end
+        subgraph ONP["Online pipeline (real-time)"]
+            FE_R["Streaming feature computation<br/>velocity 1m / 5m / 1h, amount z-score,<br/>merchant risk, device fingerprint,<br/>time since last txn"] --> ON[("Online store<br/>low-latency lookups")]
+        end
+    end
+
+    %% ---------- Training ----------
+    subgraph TRAIN["3. Model Development"]
+        direction TB
+        HP["Hyperparameter tuning"] --> M1["XGBoost baseline"]
+        M1 --> M2["LightGBM"]
+        M2 --> M3["Neural network"]
+        M3 --> CAL["Calibration<br/>Platt scaling, isotonic regression"]
+        CAL --> REG[("Model registry<br/>MLflow + data versioning")]
+    end
+
+    %% ---------- Evaluation ----------
+    subgraph EVAL["4. Evaluation"]
+        direction TB
+        MET["AUC, Precision@K, calibration curves,<br/>FPR at fixed recall"]
+        AB["A/B simulation<br/>graph-enhanced vs tabular-only<br/>uplift with confidence intervals"]
+        BIZ["Business impact<br/>GBP fraud prevented at fixed FPR"]
+        MET --> AB --> BIZ
+    end
+
+    %% ---------- CI/CD ----------
+    subgraph CICD["5. CI/CD (GitHub Actions)"]
+        direction TB
+        UT["Unit tests<br/>feature engineering logic"] --> GATE["Performance regression gate<br/>fail if AUC below threshold"]
+        GATE --> BUILD["Docker build and push"]
+    end
+
+    %% ---------- Serving ----------
+    subgraph SERVE["6. Serving"]
+        direction TB
+        API["FastAPI inference endpoint<br/>request batching, target under 50 ms"]
+        PRED(["Fraud score<br/>calibrated probability"])
+        API --> PRED
+    end
+
+    %% ---------- Monitoring ----------
+    subgraph MON["7. Monitoring"]
+        direction TB
+        DRIFT["Drift detection<br/>PSI + KS test on incoming features"]
+        LAT["Latency benchmarks<br/>p50 / p95 / p99"]
+        ALERT["Automated retraining alert"]
+        DRIFT --> ALERT
+    end
+
+    DEPLOY["Deployment<br/>AWS SageMaker endpoint or EC2"]
+
+    %% ---------- Main flow ----------
+    EDA --> FE_B
+    EDA --> FE_R
+    OFF --> HP
+    REG --> MET
+    REG --> UT
+    BUILD --> DEPLOY
+    DEPLOY --> API
+    ON --> API
+    API --> LAT
+    ON --> DRIFT
+    ALERT -. "trigger retraining" .-> FE_B
+
+    %% ---------- Styling ----------
+    classDef data fill:#E8F1FB,stroke:#2F6DB5,color:#0B2A4A
+    classDef feature fill:#FFF4E0,stroke:#C98A1B,color:#4A3000
+    classDef model fill:#EAF6EC,stroke:#3C8D4F,color:#0F3A1C
+    classDef ops fill:#F3EAF9,stroke:#7B4FA3,color:#2E1646
+    classDef serve fill:#FDECEC,stroke:#C0504D,color:#4A1210
+
+    class SRC,RAW,VAL,EDA data
+    class FE_B,FE_R,OFF,ON feature
+    class HP,M1,M2,M3,CAL,REG,MET,AB,BIZ model
+    class UT,GATE,BUILD,DEPLOY,DRIFT,LAT,ALERT ops
+    class API,PRED serve
