@@ -1,3 +1,4 @@
+```mermaid
 flowchart TB
     %% ---------- Data ----------
     subgraph DATA["1. Data and Analysis"]
@@ -88,3 +89,4 @@ flowchart TB
     class HP,M1,M2,M3,CAL,REG,MET,AB,BIZ model
     class UT,GATE,BUILD,DEPLOY,DRIFT,LAT,ALERT ops
     class API,PRED serve
+```
