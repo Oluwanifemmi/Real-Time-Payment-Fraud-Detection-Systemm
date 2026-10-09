@@ -1,6 +1,6 @@
 # End-to-End Fraud Detection ML Pipeline
 
-> A production-style machine learning pipeline for real-time payment fraud detection, covering data validation, feature engineering, model development, evaluation, CI/CD, real-time inference, monitoring, and automated retraining.
+> A production style machine learning pipeline for real time payment fraud detection, covering data validation, feature engineering, model development, evaluation, CI/CD, real time inference, monitoring, and automated retraining.
 
 ---
 
@@ -186,7 +186,7 @@ Hyperparameter Tuning
 | Uplift vs baseline | Performance improvement over the rule-based baseline |
 | Operational impact | Effect on manual review workload |
 
-> An A/B simulation compares modelling approaches — including graph-enhanced versus tabular-only features — with confidence intervals around estimated uplift.
+> An A/B simulation compares modelling approaches including graph enhanced versus tabular only features with confidence intervals around estimated uplift.
 
 ---
 
@@ -409,5 +409,3 @@ curl -X POST "http://127.0.0.1:8000/predict_probability" \
 ```
 
 ---
-
-*This project is a portfolio demonstration of production ML engineering practices. AWS infrastructure, Redis, and Airflow components are architectural targets; not all are fully implemented in this repository.*
