@@ -1,14 +1,17 @@
 import pandas as pd
-import numpy as np
 
 
+
+data = "data/payment.csv"
+train_identity_PATH = "data/train_identity.csv"
+train_transaction_path = "data/train_transaction.csv"
 
 #mapping the two raw data 
-def mapping_raw_data(x, y):
-    identity = pd.read_csv("data/train_identity.csv")
-    transaction = pd.read_csv("data/train_transaction.csv")
-    main_data = identity.join
-    return mapping_raw_data
+def mapping_raw_data(identity, transaction):
+    identity = pd.read_csv(identity)
+    transaction = pd.read_csv(transaction)
+    new_data =transaction.merge(identity, how ='left', on ='TransactionID')
+    return new_data.sample(10)
 
 
-mapping_raw_data()
+mapping_raw_data(train_identity_PATH,train_transaction_path)
