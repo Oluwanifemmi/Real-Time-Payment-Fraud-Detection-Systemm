@@ -24,4 +24,4 @@ def mapping_raw_data(identity :str, transaction:str):
 # if __name__ == "__main__":
 #     logging.basicConfig(level=logging.INFO)
 #     result = mapping_raw_data(train_identity_path, train_transaction_path)
-#     print(result.head(5))
+#     print(result.columns)

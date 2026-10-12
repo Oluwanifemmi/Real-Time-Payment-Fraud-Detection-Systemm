@@ -1,0 +1,50 @@
+{
+    "TransactionID": {
+        "unique": true,
+        "not_null": true
+    },
+    "ProductCD": {
+        "in_set": [
+            "W",
+            "C",
+            "R",
+            "H",
+            "S"
+        ]
+    },
+    "card4": {
+        "in_set": [
+            "visa",
+            "mastercard",
+            "american express",
+            "discover"
+        ]
+    },
+    "TransactionDT": {
+        "not_null": true,
+        "min": 1
+    },
+    "card6": {
+        "in_set": [
+            "debit",
+            "credit",
+            "debit or credit",
+            "charge card"
+        ]
+    },
+    "DeviceType": {
+        "in_set": [
+            "desktop",
+            "mobile"
+        ]
+    },
+    "TransactionAmt": {
+        "min": 0,
+        "max": 32000
+    },
+    "isFraud": {
+        "min": 0,
+        "max": 1,
+        "not_null": true
+    }
+}

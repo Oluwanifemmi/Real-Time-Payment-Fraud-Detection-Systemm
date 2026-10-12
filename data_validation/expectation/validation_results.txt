@@ -1,0 +1,9 @@
+[passed] TransactionID
+[passed] TransactionDT
+[passed] TransactionAmt
+[passed] ProductCD
+[passed] card6
+[passed] card4
+[passed] devicetype
+[passed] isFraud
+[passed] isFraud_notnull
