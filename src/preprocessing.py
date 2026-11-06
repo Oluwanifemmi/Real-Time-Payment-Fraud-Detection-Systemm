@@ -95,6 +95,6 @@ if __name__ == "__main__":
     data = process_corelated(data) 
     data.to_csv("data/clean_preprocessed.csv", index=False)        
 
-    print(data.shape)
-    print(data.sample(5))
+    # print(data.shape)
+    # print(data.sample(5))
 
