@@ -1,6 +1,7 @@
 import pandas as pd
 import logging
 import numpy as np
+from sklearn.impute import SimpleImputer
 
 
 logger = logging.getLogger(__name__)
@@ -16,9 +17,6 @@ def data_process(data:str):
         raise
     logger.info("completed data_process")
     return data
-
-
-
 
 #data preprocessing to  remove the columns that have mostly 0 and 1, getting 95% of the data, set threshold to 95
 def processing_binary_columns(data:pd.DataFrame):
@@ -42,8 +40,6 @@ def processing_binary_columns(data:pd.DataFrame):
     return data
 
 
-
-
 #function to remove columns with more than 200,000 missing rowa
 def missing_columns(data:pd.DataFrame):
     threshold = 200000
@@ -58,8 +54,6 @@ def missing_columns(data:pd.DataFrame):
     data = data.drop(columns=cols_to_drop)
     logger.info(f"the columns dropped include {cols_to_drop}")
     return data
-
-
 
 
 #removing the columns that are higly correlated
@@ -86,15 +80,64 @@ def process_corelated(data: pd.DataFrame):
 
 
 
+# loop through the categorical data and fill with most frequent
+def filling_categorical(data:pd.DataFrame):
+    data = pd.read_csv(data)
+    categorical_data = data.select_dtypes(exclude='number').columns.tolist()
+    for x in categorical_data:
+        if data[x].isna().sum() > 0:
+            imputer = SimpleImputer(strategy='most_frequent')
+            data[x] = imputer.fit_transform(data[[x]]).ravel()
+    return data
+
+
+# loop through the categorical data and fill with most frequent
+def filling_categoricals(data:pd.DataFrame):
+    numerical_data = data.select_dtypes(include='number').columns.tolist()
+    for x in numerical_data:
+        if data[x].isna().sum() > 0:
+            imputer = SimpleImputer(strategy='mean')
+            data[x] = imputer.fit_transform(data[[x]]).ravel()
+    return data
+
+
+
+# make sure these columns are numeric,creating uid
+def uid_policy(data:pd.DataFrame):
+    for col in ["TransactionDT", "D1", "card1", "addr1"]:
+        data[col] = pd.to_numeric(data[col], errors="coerce")
+
+    # TransactionDT is in seconds, so convert to days
+    day = data["TransactionDT"] / (24 * 60 * 60)
+
+    # day the account started: constant for the same client
+    data["account_start_day"] = np.floor(day - data["D1"])
+
+    # glue the clues together into one client label
+    data["uid"] = (
+        data["card1"].astype(str) + "_"
+        + data["addr1"].astype(str) + "_"
+        + data["account_start_day"].astype(str))
+    has_nan = data["uid"].str.contains("nan")
+    data.loc[has_nan, "uid"] = "unknown"
+    return data 
+
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
+    
     data = data_process(datapath)          
     data = missing_columns(data)          
     data = processing_binary_columns(data) 
     data = process_corelated(data) 
+    data = filling_categorical(datapath)          
+    data = filling_categoricals(data)          
+    data = uid_policy(data)
+
+
     data.to_csv("data/clean_preprocessed.csv", index=False)        
 
-    # print(data.shape)
-    # print(data.sample(5))
+    print(data.columns)
+    print(data.sample(5))
 
