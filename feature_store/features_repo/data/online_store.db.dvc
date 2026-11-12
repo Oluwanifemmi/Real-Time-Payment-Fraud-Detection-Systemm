@@ -1,0 +1,5 @@
+outs:
+- md5: 293ad59ae427882ac2d8e7fd69e3dd43
+  size: 830603264
+  hash: md5
+  path: online_store.db
